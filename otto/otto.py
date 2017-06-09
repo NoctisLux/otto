@@ -6,8 +6,17 @@ from dateutil.rrule import rrule, YEARLY, MONTHLY, WEEKLY, DAILY, HOURLY, MINUTE
 
 
 class Event:
+    """basic input of a Schedule"""
 
     def __init__(self, title, description, start, duration, repeating = None):
+        """Build an event.
+
+        title -- short string identifying the event
+        description -- string describing the event in detail
+        start -- datetime.datetime of the event's activation
+        duration -- datetime.timedelta as long as one occurrence of that event
+        repeating -- dateutil.rrule.rrule for recurring events (None if unique)
+        """
         self._title = title
         self._description = description
         self._start = start
@@ -15,9 +24,11 @@ class Event:
         self._repeating = repeating
 
     def __repr__(self):
+        """Give the event's string representation."""
         return """otto.Event("{0}", "{1}", {2}, {3}, {4})""".format(self._title, self._description, repr(self._start), repr(self._duration), "rrulestr({})".format(self._repeating) if self._repeating != None else "None")
 
     def __str__(self):
+        """Give the event's user-friendly string representation"""
         return """Event "{0}" ("{1}")
 Start date: {2};
 Duration: {3};
@@ -25,16 +36,29 @@ Duration: {3};
 
 
 class Task (Event):
+    """basic unit of a user's work to fit in a Schedule"""
 
     def __init__(self, title, description, start, duration, priority, due, repeating = None):
+        """Build a task
+
+        title -- short string identifying the event
+        description -- string describing the event in detail
+        start -- datetime.datetime of the event's activation
+        duration -- datetime.timedelta as long as one occurrence of that event
+        priority -- integer representing the importance of the task
+        due -- datetime.datetime before when the task has to be done
+        repeating -- dateutil.rrule.rrule for recurring events (None if unique)
+        """
         super(Task, self).__init__(title, description, start, duration, repeating)
         self._priority = priority
         self._due = due
 
     def __repr__(self):
+        """Give string representation of the task."""
         return """otto.Task("{0}", "{1}", {2}, {3}, {4}, {5}, {6})""".format(self._title, self._description, repr(self._start), repr(self._duration), self._priority, self._due, "rrulestr({})".format(self._repeating) if self._repeating != None else "None")
 
     def __str__(self):
+        """Give user-friendly string representation of the task."""
         return """Task "{0}" ("{1}")
 Start date: {2};
 Duration: {3};
@@ -44,18 +68,33 @@ Due date: {5};
 
 
 class Occurrence:
+    """Occurrence of an Event inside a Schedule"""
 
     def __init__(self, event, start, duration):
+        """Build an Occurrence.
+
+        event -- Event the Occurrence is an instance of
+        start -- datetime.datetime of when the Occurrence starts
+        duration -- datetime.timedelta length of the Occurrence
+        """
         self._event = event
         self._start = start
         self._duration = duration
     def __repr__(self):
+        """Give string representation of the Occurrence."""
         return "otto.Occurrence({0}, {1}, {2})".format(repr(self._event), repr(self._start), repr(self._duration))
 
 
 class Schedule:
+    """Auto-organizing Schedule"""
 
     def __init__(self, events, tasks, start=None):
+        """Build a Schedule.
+
+        events -- list of events sorted by start date
+        tasks -- list of tasks sorted by start date
+        start -- datetime.datetime of beginning of the Schedule (default to the earliest event of the list)
+        """
         #events_, tasks_ = sorted(events, key=lambda e: e.start), sorted(tasks, key=lambda t: t.start)
         self._start = start if start != None else events[0]._start
         self._timeline = list()
