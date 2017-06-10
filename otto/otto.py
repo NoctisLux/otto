@@ -105,6 +105,15 @@ class Schedule:
                 self._end = t._due
         for e in events: self._add_event(e)
 
+    def __repr__(self):
+        """Give the string representation of the timeline's content"""
+        return "list({0})".format(",\n".join(repr(o) for o in self._timeline))
+
+    def __str__(self):
+        """Give the user-friendly string representation of the Schedule"""
+        return '\n'.join("from {0} to {1}: {2}".format(o._start, o._start + o._duration, o._event._title) for o in self._timeline)
+
+
     def _add_event(self, event):
         if event._repeating == None:
             self._add_occ(Occurrence(event, event._start, event._duration))
@@ -126,3 +135,4 @@ if __name__ == "__main__":
     print(singleEvent)
     print(firstTask)
     aSchedule = Schedule([sleepEvent, singleEvent], [firstTask], datetime(2017,6,1,20))
+    print(str(aSchedule))
