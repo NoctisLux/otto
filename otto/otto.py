@@ -126,6 +126,25 @@ class Schedule:
         self._timeline.append(occ)
         self._timeline.sort(key=lambda o: o._start)
 
+    def get_free_time(self,after, before=None):
+        """Return a datetime.timedelta of the free time between two dates in this schedule.
+
+        after -- datetime.datetime after which looking for free time
+        before -- datetime.datetime before which looking for free time
+        """
+        if before == None: before = self._end
+        #time to invest overall minus free time after "before"
+        if before < self._end:
+            return self.get_free_time(start, self._end) - self.get_free_time(end, self._end)
+        free_time = timedelta(0)
+        for i, occ in enumerate(self._timeline):
+            if occ._start+occ._duration >= after:
+                if i < len(self._timeline)-1:
+                    free_time += (self._timeline[i+1]._start - (occ._start+occ._duration)) if (self._timeline[i+1]._start > occ._start+occ._duration) else timedelta(0)
+                else:
+                    free_time += before - (occ._start+occ._duration) if before > occ._start+occ._duration else timedelta(0)
+        return free_time
+
 #tests
 if __name__ == "__main__":
     sleepEvent = Event("Sleeping", "Daily sleep", datetime(2016,1,1,20,0,0), timedelta(0,8*60*60), rrule(DAILY, dtstart=datetime(2016,1,1,20,0,0)))
@@ -136,3 +155,4 @@ if __name__ == "__main__":
     print(firstTask)
     aSchedule = Schedule([sleepEvent, singleEvent], [firstTask], datetime(2017,6,1,20))
     print(str(aSchedule))
+    print(aSchedule.get_free_time(datetime(2017,6,1, 21)))
