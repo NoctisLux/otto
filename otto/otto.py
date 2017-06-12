@@ -25,7 +25,7 @@ class Event:
 
     def __repr__(self):
         """Give the event's string representation."""
-        return """otto.Event("{0}", "{1}", {2}, {3}, {4})""".format(self._title, self._description, repr(self._start), repr(self._duration), "rrulestr({})".format(self._repeating) if self._repeating != None else "None")
+        return """otto.Event("{0}", "{1}", {2}, {3}, {4})""".format(self._title, self._description, repr(self._start), repr(self._duration), 'dateutil.rrule.rrulestr("{}")'.format(self._repeating) if self._repeating != None else "None")
 
     def __str__(self):
         """Give the event's user-friendly string representation"""
@@ -148,7 +148,7 @@ class Schedule:
 #tests
 if __name__ == "__main__":
     sleepEvent = Event("Sleeping", "Daily sleep", datetime(2016,1,1,20,0,0), timedelta(0,8*60*60), rrule(DAILY, dtstart=datetime(2016,1,1,20,0,0)))
-    singleEvent = Event("Birthday", "random birthday", datetime(2017, 6, 29, 10, 0, 0), timedelta(0, 10*60*60), None)
+    singleEvent = Event("Birthday", "random birthday", datetime(2017, 6, 29, 10, 0, 0), timedelta(1), None)
     firstTask = Task("First task", "This is my first task", datetime(2017,5,31,13,37), timedelta(0,5*60), 57, datetime(2017,6,6,12))
     print(sleepEvent)
     print(singleEvent)
