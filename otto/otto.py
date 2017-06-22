@@ -32,7 +32,7 @@ class Event:
         return """Event "{0}" ("{1}")
 Start date: {2};
 Duration: {3};
-{4}""".format(self._title, self._description, self._start, self._duration, "Unique." if self._repeating == None else "Repeating:\n{}".format(self._repeating))
+{4}""".format(self._title, self._description, self._start, self._duoration, "Unique." if self._repeating == None else "Repeating:\n{}".format(self._repeating))
 
 
 class Task (Event):
@@ -55,7 +55,7 @@ class Task (Event):
 
     def __repr__(self):
         """Give string representation of the task."""
-        return """otto.Task("{0}", "{1}", {2}, {3}, {4}, {5}, {6})""".format(self._title, self._description, repr(self._start), repr(self._duration), self._priority, self._due, "rrulestr({})".format(self._repeating) if self._repeating != None else "None")
+        return """otto.Task("{0}", "{1}", {2}, {3}, {4}, {5}, {6})""".format(self._title, self._description, repr(self._start), repr(self._duration), self._priority, repr(self._due), 'dateutil.rrule.rrulestr("{}")'.format(self._repeating) if self._repeating != None else "None")
 
     def __str__(self):
         """Give user-friendly string representation of the task."""
@@ -95,9 +95,11 @@ class Schedule:
         tasks -- list of tasks sorted by start date
         start -- datetime.datetime of beginning of the Schedule (default to the earliest event of the list)
         """
-        #events_, tasks_ = sorted(events, key=lambda e: e.start), sorted(tasks, key=lambda t: t.start)
+        #in case we want to sort it: events_, tasks_ = sorted(events, key=lambda e: e.start), sorted(tasks, key=lambda t: t.start)
+
         self._start = start if start != None else events[0]._start
         self._timeline = list()
+        
         #finding the due date of the last task
         self._end = tasks[0]._due
         for t in tasks[1:]:
@@ -105,6 +107,17 @@ class Schedule:
                 self._end = t._due
         for e in events: self._add_event(e)
 
+        #truncating the part of the timeline before start
+        if self._timeline[0]._start < self.start:
+            tronc = 0
+            for i, o in enumerate(self._timeline):
+                if o._start + o._duration <= self.start:
+                    tronc = i #identify where the start is;
+            del self._timeline[:i+1] #remove what ends before;
+            for o in self._timeline: #and shave what starts before.
+                if o._start < self._start:
+                    o._duration -= (self._start - o._start)
+                    o._start = self._start
     def __repr__(self):
         """Give the string representation of the timeline's content"""
         return "list({0})".format(",\n".join(repr(o) for o in self._timeline))
@@ -147,12 +160,4 @@ class Schedule:
 
 #tests
 if __name__ == "__main__":
-    sleepEvent = Event("Sleeping", "Daily sleep", datetime(2016,1,1,20,0,0), timedelta(0,8*60*60), rrule(DAILY, dtstart=datetime(2016,1,1,20,0,0)))
-    singleEvent = Event("Birthday", "random birthday", datetime(2017, 6, 29, 10, 0, 0), timedelta(1), None)
-    firstTask = Task("First task", "This is my first task", datetime(2017,5,31,13,37), timedelta(0,5*60), 57, datetime(2017,6,6,12))
-    print(sleepEvent)
-    print(singleEvent)
-    print(firstTask)
-    aSchedule = Schedule([sleepEvent, singleEvent], [firstTask], datetime(2017,6,1,20))
-    print(str(aSchedule))
-    print(aSchedule.get_free_time(datetime(2017,6,1, 21)))
+    print(str(Task("a task", "description of it", datetime.now(), timedelta(0,360), 99, datetime.now()+timedelta(1), rrule(DAILY, dtstart=datetime.now()))))
