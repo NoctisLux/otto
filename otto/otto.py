@@ -158,6 +158,41 @@ class Schedule:
                     free_time += before - (occ._start+occ._duration) if before > occ._start+occ._duration else timedelta(0)
         return free_time
 
+    def get_free_intervals(after, before=None):
+        """Return a list of tuples (datetime.datetime, datetime.datetime) representing the intervals of free time of this schedule.
+
+        after -- datetime.datetime after which looking for free time
+        before -- datetime.datetime before which looking for free time
+        """
+        intervals = list()
+        #entire list of intervals
+        for i, occ in enumerate(self._timeline):
+                if i < len(self._timeline)-1:
+                    if occ._start+occ._duration < self_timeline[i+1]._start:
+                        intervals.append(tuple((occ._start+occ._duration, self_timeline[i+1]._start))) 
+                else:
+                    if before > occ._start+occ._duration:
+                        intervals.append(tuple((occ._start+occ._duration, before)))
+        
+        #cutting before start and after end
+        for i, t in enumerate(intervals):
+            if t[1] <= after:
+                trimstart = i
+            elif trimend != None and t[0] >= before:
+                trimend = i
+        del intervals[:trimstart+1]
+        del intervals[trimend+1:]
+
+        #trimming first and last if needed
+        if intervals[0][0] > after and intervals[0][1] < after:
+            intervals.insert(1, tuple((after, intervals[0][1])))
+            del intervals[0]
+        if intervals[-1][1] > before and intervals[-1][0] < before:
+            intervals.append(tuple((intervals[-1][0], before)))
+            del intervals[-2]
+
+        return intervals
+
 #tests
 if __name__ == "__main__":
     print(str(Task("a task", "description of it", datetime.now(), timedelta(0,360), 99, datetime.now()+timedelta(1), rrule(DAILY, dtstart=datetime.now()))))
