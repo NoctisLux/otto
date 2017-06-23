@@ -158,7 +158,7 @@ class Schedule:
                     free_time += before - (occ._start+occ._duration) if before > occ._start+occ._duration else timedelta(0)
         return free_time
 
-    def get_free_intervals(after, before=None):
+    def get_free_intervals(self, after, before=None):
         """Return a list of tuples (datetime.datetime, datetime.datetime) representing the intervals of free time of this schedule.
 
         after -- datetime.datetime after which looking for free time
